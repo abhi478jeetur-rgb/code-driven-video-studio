@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hybrid Studio Clip 1: Cyber Core & AI Genesis (Three.js + p5.js + Anime.js + Shadcn UI)</title>
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- 1. Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  
+  <!-- 2. Three.js for 3D Geometry, Lighting & Camera -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  
+  <!-- 3. Anime.js for Master Timeline Choreography -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  
+  <!-- 4. p5.js for Procedural VFX, Math Particles & Canvas Overlays -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+</head>
+<body>
+  <div id="video-container">
+    <!-- Layer 1: Three.js 3D WebGL Canvas -->
+    <div id="three-container"></div>
+    
+    <!-- Layer 2: p5.js Transparent VFX Canvas (injected by p5) -->
+    <div id="p5-container"></div>
+    
+    <!-- Layer 3: HTML + CSS Glassmorphic Shadcn UI Overlay -->
+    <div id="hud-overlay">
+      <!-- Top Status Header -->
+      <header class="hud-header">
+        <div class="hud-badge pulse-badge">
+          <span class="status-dot"></span>
+          <span class="badge-text">AI CORE V4.2 // ACTIVE</span>
+        </div>
+        <div class="hud-timecode" id="hud-timecode">00:00.00</div>
+      </header>
+      
+      <!-- Right Side Live Telemetry -->
+      <aside class="hud-telemetry">
+        <div class="telemetry-card">
+          <div class="card-label">QUANTUM COMPUTE</div>
+          <div class="card-value" id="val-compute">0.00 PFLOPS</div>
+          <div class="mini-bar-track"><div class="mini-bar-fill" id="bar-compute"></div></div>
+        </div>
+        <div class="telemetry-card">
+          <div class="card-label">SYNAPSE COHERENCE</div>
+          <div class="card-value" id="val-coherence">0.0 %</div>
+          <div class="mini-bar-track"><div class="mini-bar-fill" id="bar-coherence"></div></div>
+        </div>
+        <div class="telemetry-card">
+          <div class="card-label">CORE FLUX TEMP</div>
+          <div class="card-value" id="val-temp">300 K</div>
+        </div>
+      </aside>
+      
+      <!-- Center Lower Kinetic Typography -->
+      <main class="hud-center-text">
+        <div class="subtitle-tag" id="hud-tag">SEQUENCE PHASE 01</div>
+        <h1 class="main-title" id="hud-title">INITIALIZING CORE...</h1>
+        <p class="description-line" id="hud-desc">Synchronizing high-dimensional neural tensors</p>
+      </main>
+      
+      <!-- Bottom Controls & Timeline Bar -->
+      <footer class="hud-footer">
+        <div class="timeline-track">
+          <div class="timeline-progress" id="timeline-progress"></div>
+        </div>
+        <div class="footer-meta">
+          <span class="meta-tag">1080x1920 (9:16) | 60 FPS</span>
+          <span class="meta-tip">SPACE: Pause | R: Record WebM | Left/Right: Scrub</span>
+        </div>
+      </footer>
+      
+      <!-- CRT / Scanline Effect Overlay -->
+      <div class="scanlines"></div>
+      <div class="vignette"></div>
+    </div>
+  </div>
+
+  <script src="sketch.js"></script>
+</body>
+</html>

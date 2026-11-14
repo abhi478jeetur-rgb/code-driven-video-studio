@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hybrid Studio: Full-Production 10s Animated Video Engine</title>
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Modern Typography Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  
+  <!-- CDN Libraries (Zero Local Installation Needed!) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+</head>
+<body>
+  <!-- Studio Control Header (Outside Video Canvas) -->
+  <div class="studio-bar">
+    <div class="studio-logo">
+      <span class="logo-dot"></span>
+      <span class="logo-title">HYBRID MOTION ENGINE</span>
+      <span class="logo-tag">p5.js + Three.js + Anime.js + Shadcn UI</span>
+    </div>
+    
+    <!-- Mode Switcher -->
+    <div class="mode-tabs">
+      <button class="tab-btn active" onclick="switchClip(0)">MASTER 10s REEL</button>
+      <button class="tab-btn" onclick="switchClip(1)">CLIP 1: CYBER CORE</button>
+      <button class="tab-btn" onclick="switchClip(2)">CLIP 2: 67-VOXEL HORIZON</button>
+      <button class="tab-btn" onclick="switchClip(3)">CLIP 3: FINTECH 3D CARD</button>
+    </div>
+    
+    <div class="studio-actions">
+      <button class="btn-record" id="btn-record" onclick="toggleRecording()">
+        <span class="rec-dot"></span>
+        <span id="rec-label">EXPORT 60FPS WEBM</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main 9:16 Vertical Video Production Stage -->
+  <div id="video-container">
+    <!-- LAYER 1: Three.js 3D WebGL Canvas -->
+    <div id="three-container"></div>
+    
+    <!-- LAYER 2: p5.js Transparent VFX Canvas -->
+    <div id="p5-container"></div>
+    
+    <!-- LAYER 3: HTML + CSS Glassmorphic Shadcn UI Overlay -->
+    <div id="hud-overlay">
+      <header class="hud-header">
+        <div class="hud-badge" id="hud-badge">
+          <span class="status-dot"></span>
+          <span class="badge-text" id="badge-text">MASTER PIPELINE // 60 FPS</span>
+        </div>
+        <div class="hud-timecode" id="hud-timecode">00:00.00</div>
+      </header>
+      
+      <!-- Dynamic Center Typography & Telemetry -->
+      <main class="hud-center-text">
+        <div class="chip-tag" id="hud-tag">EXPERIMENT SUITE</div>
+        <h1 class="main-title" id="hud-title">HYBRID GENERATIVE VIDEO</h1>
+        <p class="description-line" id="hud-desc">Three.js 3D depth + p5.js procedural math + Anime.js timeline</p>
+      </main>
+      
+      <!-- Dynamic Floating Widgets (Visible based on Clip/Phase) -->
+      <div class="hud-dynamic-widget" id="dynamic-widget"></div>
+      
+      <!-- Footer Timeline Track & Controls -->
+      <footer class="hud-footer">
+        <div class="timeline-track" id="timeline-track">
+          <div class="timeline-progress" id="timeline-progress"></div>
+        </div>
+        <div class="footer-meta">
+          <span class="meta-format">1080x1920 (9:16) • 10.00 SECONDS • ZERO INSTALL</span>
+          <span class="meta-controls">SPACE: Pause | CLICK: Scrub | R: Record</span>
+        </div>
+      </footer>
+      
+      <div class="vignette"></div>
+      <div class="scanlines"></div>
+    </div>
+  </div>
+
+  <script src="sketch.js"></script>
+</body>
+</html>

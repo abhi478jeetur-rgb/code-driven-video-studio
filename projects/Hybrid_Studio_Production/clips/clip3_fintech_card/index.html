@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hybrid Studio Clip 3: Fintech 3D Holographic Card (Three.js 3D Card + p5 Fluid Waves + Shadcn UI)</title>
+  <link rel="stylesheet" href="style.css">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+</head>
+<body>
+  <div id="video-container">
+    <!-- Layer 1: Three.js 3D Titanium Smart Card -->
+    <div id="three-container"></div>
+    
+    <!-- Layer 2: p5.js Fluid Mathematical Sine Waves & NFC Pulses -->
+    <div id="p5-container"></div>
+    
+    <!-- Layer 3: Shadcn UI Fintech Dashboard Overlay -->
+    <div id="hud-overlay">
+      <!-- Header -->
+      <header class="hud-header">
+        <div class="hud-badge">
+          <span class="brand-sparkle">✦</span>
+          <span class="badge-text">APEX TITANIUM CARD</span>
+        </div>
+        <div class="hud-timecode" id="hud-timecode">00:00.00</div>
+      </header>
+      
+      <!-- Balance Hero Display -->
+      <section class="balance-section">
+        <div class="balance-label">TOTAL ACCUMULATED LIQUIDITY</div>
+        <div class="balance-amount" id="balance-amount">$0.00</div>
+        <div class="growth-tag">
+          <span class="growth-arrow">↑</span>
+          <span class="growth-val">+34.8% THIS MONTH</span>
+        </div>
+      </section>
+      
+      <!-- Live Floating Transaction Feed (Shadcn Glass Cards) -->
+      <section class="transactions-container">
+        <div class="tx-card" id="tx-1">
+          <div class="tx-icon stripe-icon">S</div>
+          <div class="tx-details">
+            <div class="tx-name">Stripe Global Payout</div>
+            <div class="tx-time">Just now • Automated</div>
+          </div>
+          <div class="tx-amount positive">+$12,450.00</div>
+        </div>
+        
+        <div class="tx-card" id="tx-2">
+          <div class="tx-icon apple-icon"></div>
+          <div class="tx-details">
+            <div class="tx-name">Apple Pay Contactless</div>
+            <div class="tx-time">2s ago • Biometric Auth</div>
+          </div>
+          <div class="tx-amount negative">-$189.50</div>
+        </div>
+      </section>
+      
+      <!-- Bottom CTA Banner -->
+      <footer class="hud-footer">
+        <div class="cta-pill">
+          <span class="cta-dot"></span>
+          <span class="cta-text">ZERO-FEE INSTANT SETTLEMENTS</span>
+        </div>
+        <div class="timeline-track">
+          <div class="timeline-progress" id="timeline-progress"></div>
+        </div>
+      </footer>
+      
+      <div class="vignette"></div>
+    </div>
+  </div>
+
+  <script src="sketch.js"></script>
+</body>
+</html>
