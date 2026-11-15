@@ -1,27 +1,60 @@
-# Code-Driven Video Studio v2
+<p align="center"><img src="docs/og.png" alt="Code-Driven Video Studio" width="720"></p>
 
-Give `SKILL.md` (plus this folder) to any coding agent. It analyses a reference video, writes deterministic p5.js / Three.js code, renders an MP4 frame by frame, and scores it against the reference.
+# Code-Driven Video Studio v3
 
-Quick start:
+A skill for coding agents: give it a reference video or an idea, and it writes deterministic code (p5.js, Three.js, 67.js or Blender bpy), renders an MP4 frame by frame, and scores it against the reference.
+
+**Landing page:** https://abhi478jeetur-rgb.github.io/code-driven-video-studio/
+
+## Examples
+
+All example videos live here in this README. Each one has its code folder in `examples/`.
+
+<!-- EXAMPLES:START -->
+| # | Example | Engine | Video |
+|---|---|---|---|
+| 1 | Math art Short | p5-2d | coming soon |
+| 2 | Stylised 3D scene | p5-webgl | coming soon |
+| 3 | PBR product spin | three-hybrid | coming soon |
+| 4 | Realistic 3D shot | Blender bpy / 67.js | coming soon |
+<!-- EXAMPLES:END -->
+
+## Quick start
     pip install numpy pillow opencv-python-headless
     npm i playwright && npx playwright install --with-deps chromium
     python3 tools/analyze.py ref.mp4 --out ana
     node tools/render.mjs templates/p5-2d --out test.mp4
     python3 tools/compare.py ref.mp4 test.mp4 ana/analysis.json
+    # realistic 3D (Blender 4.x)
+    bash templates/blender/render_blender.sh templates/blender/scene.py test3d.mp4 draft
 
-## What changed from v1 (fixes)
-- v1 code broke its own determinism rule (Math.random / random() particles mutated every frame). v2: every frame is render(t) with seeded rng/hash; a self-check grep catches it.
-- v1 exported realtime MediaRecorder WebM (dropped frames, variable timing). v2: tools/render.mjs steps every frame headless and pipes it to ffmpeg (closed-GOP H.264 MP4, chunkable with --from/--to).
-- v1 put text in DOM/SVG layers, which canvas capture never records. v2: all text is drawn on the canvas (p5 HUD texture in the Three template).
-- v1 had no way to study a reference video. v2: tools/analyze.py (cuts, per-shot camera solve, palette, motion curve, object tracking -> keyframes with fitted easing) + tools/compare.py (score + fix loop).
-- v1 described Zod compiler, Merkle cache, audio engine and WebCodecs in docs only. v2 ships working pieces instead: KF timeline (no compiler needed), chunk re-render via --from/--to, tools/mix_audio.py (adelay all=1, sidechain duck, loudnorm -14 LUFS).
-- v1 defaulted to 1920x1080; v2 defaults to 1080x1920 Shorts with safe zones.
-- Removed ~220 KB research files from the agent path (too long for an agent context); the skill is one 11 KB file.
-- Fixed "67.js" typo; antialias/setAttributes and p5 WEBGL material-state bugs documented.
+## Pick the engine
+| Need | Engine |
+|---|---|
+| 2D, math art, text, particles, UI motion | p5-2d |
+| stylised 3D (low-poly, toon) | p5-webgl |
+| PBR, bloom, many instances, glTF | three-hybrid |
+| realistic 3D, rigs, HDRI, path tracing | 67.js (MCP) or Blender bpy |
+| photo-real static background | Gaussian splats (Spark) |
+
+## What's new in v3
+- Realistic 3D path: 67.js (MIT, MCP-driven, Glaze raster + Cook path tracer) as main, Blender bpy + EEVEE as backup.
+- `templates/blender/`: code-only bpy scene with the same KF timeline, plus `render_blender.sh` with draft/final/cycles presets that fit a 4 GB GPU.
+- `tools/track_camera.py` (COLMAP camera solve to KF json) and `tools/pose.py` (MediaPipe pose to BVH for retargeting).
+- Honest ceiling: about 70–90% of a realistic look with good assets, a rig and HDRI light. A video can't be turned back into its original code, and the original characters are never copied.
+- p5-webgl is now marked stylised only.
+- Dropped: Anime.js, Vivus, Flubber, tsParticles, shadcn, Matter (the KF timeline and seeded particles cover them).
+
+## Layout
+    SKILL.md           the skill (give this to the agent)
+    LESSONS.md         lessons learned per video
+    core/              studio-core.js (rng, easings, kf timeline)
+    templates/         p5-2d, p5-webgl, three-hybrid, blender
+    tools/             analyze, render, compare, mix_audio, track_camera, pose
+    examples/          finished example projects
+    docs/              landing page + OG image
 
 ## Tested
-analyze.py and compare.py were run on a test clip. All JS passes `node --check`. render.mjs and the three templates were NOT rendered in the build sandbox (Chromium was missing system libraries there); the first run on your machine is the real test, and any page error is printed.
+analyze.py and compare.py were run on a test clip. All JS passes `node --check`, all Python compiles. render.mjs, the web templates, the Blender template, pose.py and track_camera.py were not run in the build sandbox (no working Chromium, Blender, COLMAP or GPU there). The first run on your machine is the real test.
 
-## Older material
-- projects/Hybrid_Studio_Production: v1 reference demo (Three.js + p5, realtime WebM).
-- research.md, research2.md: v1 background research (not needed by the agent).
+MIT license.

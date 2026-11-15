@@ -2,7 +2,7 @@
 name: code-driven-video-studio
 description: >-
   Build production-grade 2D animation, 3D animation and motion-graphics videos entirely in code
-  (p5.js 2D, p5.js WEBGL, Three.js + p5 hybrid), and recreate any reference video as closely as code allows.
+  (p5.js 2D, p5.js WEBGL stylised 3D, Three.js + p5 hybrid, 67.js or Blender bpy for realistic 3D), and recreate any reference video as closely as code allows.
   Deterministic frame-stepping, measured keyframes from the reference, headless MP4 export, audio EDL mix,
   and a score-and-fix loop. Output is runnable code plus an MP4, never a prompt.
 ---
@@ -24,6 +24,7 @@ You are a motion designer who writes code. Every request ends with **runnable co
 
 ## 1. Package layout
 ```
+examples/                  finished example projects (one folder each, shown in README)
 core/studio-core.js        rng, hash01, Ez (easings), kf(), prog(), activeShots(), colours, RENDER_MODE
 templates/p5-2d/           2D motion graphics, math art, kinetic type, infographics
 templates/p5-webgl/        stylised 3D in p5 (camera KF, lights, material reset, bg quad)
@@ -32,30 +33,43 @@ tools/analyze.py           reference video -> shots, cuts, camera solve, palette
 tools/render.mjs           headless Chromium frame-stepper -> ffmpeg -> MP4 (closed GOP, chunkable)
 tools/compare.py           per-shot score of your render vs reference (structure, colour, motion)
 tools/mix_audio.py         audio EDL json -> ffmpeg (delays, sidechain duck, -14 LUFS)
+tools/track_camera.py      reference -> camera path (COLMAP) -> KF json for Blender/Three
+tools/pose.py              reference -> human pose (MediaPipe) -> BVH for retargeting
+templates/blender/         bpy scene + render_blender.sh (draft/final presets, 4 GB GPU safe)
 ```
-Setup once: `pip install numpy pillow opencv-python-headless` ; `npm i playwright && npx playwright install --with-deps chromium` ; ffmpeg on PATH.
+Setup once: `pip install numpy pillow opencv-python-headless` (optional: `mediapipe` for pose.py, COLMAP for track_camera.py, Blender 4.x) ; `npm i playwright && npx playwright install --with-deps chromium` ; ffmpeg on PATH.
 
 ## 2. Pick the engine
 | Need | Use |
 |---|---|
 | flat shapes, lines, text, particles, graphs, math curves, UI motion | `p5-2d` |
-| depth, orbiting camera, simple characters/objects, low-poly, toon | `p5-webgl` |
+| stylised 3D: low-poly, toon, simple objects, orbiting camera | `p5-webgl` (never for "realistic") |
 | PBR metal/glass, bloom, fog, 10k+ instances, GLTF models, post FX | `three-hybrid` |
-| a mix | three-hybrid (3D) + p5 layer (2D VFX + text) on the same canvas |
+| realistic 3D: rigged characters, HDRI light, soft shadows, path tracing | **67.js** via its MCP server (main) or **Blender bpy + EEVEE** (`templates/blender`, backup) |
+| photo-real static environment behind 3D action | Gaussian splats (Spark, or GaussianSplats3D, now unmaintained) as background only: no rig, no relight |
+| a mix | 3D engine for the scene + p5 layer for 2D VFX and text, composited |
 p5-2d and p5-webgl also run in the p5 web editor (add `studio-core.js` as a file). three-hybrid needs a local server (render.mjs starts one).
+Dropped as dead weight: Anime.js, Vivus, Flubber, tsParticles, shadcn, Matter (the `kf()` timeline and seeded particles cover them; shadcn/DOM never reaches the canvas).
 
+### 2a. 67.js (realistic, code-only)
+`github.com/codepawl/67.js`, MIT, pre-1.0 (API changes about weekly: pin the version). Needs Node 20.19+ and Chrome. Drive it through its MCP server: `npx 67js-mcp --backend gpu` (or `cpu`). Glaze = WebGL2 rasteriser for drafts; Cook = path tracer for finals. Addons: HDRI, terrain, vegetation, glTF, retarget, skeleton-pose IK, vehicles, Rapier physics, light-bake, PNG/MP4 export. Their own benchmark (RTX 3060 12 GB, 960x540): Cook 0.7–1.3 s for 256 samples vs Cycles 3.4–8.5 s, but noisy scenes need many more samples, and metal/glass are biased. On a 4 GB card it is untested: start with Glaze drafts at 540x960, then Cook on hero shots only.
+
+### 2b. Blender bpy (backup, most mature)
+`blender -b -P templates/blender/scene.py -- --out frames/ --preset draft`. EEVEE on a 4 GB GPU: roughly 1–3 s per frame at 720x1280 (estimate). Cycles is far slower: hero shots only. Headless (`-b`) saves only ~5–15%. Keep textures ≤ 2K, use the `draft` preset for checks and `final` once.
 ## 3. Workflow A — recreate a reference video
 1. **Probe + analyse** (never skip):
    `python3 tools/analyze.py ref.mp4 --out ana` → `ana/analysis.md` (shot table), `analysis.json`, `shot_XX.jpg` contact sheets. Frames are taken at the native fps for videos ≤ 60 s.
 2. **Look**: open every `shot_XX.jpg` and the first/middle/last key frame of each shot. Fill the two empty columns of the shot table: *what is on screen* and *2D/3D*. Note: subjects, layout (in target px), background, lighting direction, materials, text style, transition type into the next shot.
-3. **Measure motion**: for every moving hero object, run a track:
+3. **Recover 3D data when the reference is 3D** (video is NOT reversible to code; only these come back):
+   camera path `python3 tools/track_camera.py ref.mp4 --out ana/cam` (needs COLMAP, or use Blender's motion tracker); human pose `python3 tools/pose.py ref.mp4 --out ana/pose.bvh` (MediaPipe → BVH, retarget onto a Mixamo/MPFB2 rig); depth for layout with Depth Anything; palette + light direction from analyze.py. Meshes and materials come from assets (Poly Haven, BlenderKit, Sketchfab CC, Mixamo, MPFB2, or image-to-3D like TRELLIS / Hunyuan3D), never copies of the original characters or brands.
+4. **Measure motion**: for every moving hero object, run a track:
    `python3 tools/analyze.py ref.mp4 --out ana --track "x,y,w,h@t0"` (box in source px at time t0). The result `tracks[i].kf` is already `[[t,[x,y],ease],...]` in target px — paste it into `KF`. Camera: use `camera` / `pan_px_total` / `zoom_total` / `roll_deg` per shot (+ `camera_per_frame` for exact curves). 2D: camera = translate/scale/rotate of the world layer. 3D: zoom → dolly or fov, pan → target move; parallax between layers ⇒ orbit, uniform shift ⇒ pan.
-4. **Timing**: shot boundaries = `cuts`. Peaks in `motion_curve` = beats/impacts; put KF keys on them. Ease per segment = the fitted ease from the track (linear, inOutSine, outCubic, outExpo, inExpo, outBack...).
-5. **Colour**: use each shot's `palette` hex values directly (bg gradient = the 2 darkest dominant colours).
-6. **Build** from the right template (§4). One function per shot, SHOTS and TRANSITIONS arrays, KF table at top.
-7. **Render**: `node tools/render.mjs <projectDir> --out mine.mp4` (fails loudly on any page error).
-8. **Score + fix**: `python3 tools/compare.py ref.mp4 mine.mp4 ana/analysis.json`. Fix the worst shot first (framing → timing → colour → easing), re-render only that range with `--from/--to`, repeat until gains are small (≤ 3 rounds unless asked).
-9. **Deliver**: code folder + MP4 + 3-line note (engine, scores, known gaps).
+5. **Timing**: shot boundaries = `cuts`. Peaks in `motion_curve` = beats/impacts; put KF keys on them. Ease per segment = the fitted ease from the track (linear, inOutSine, outCubic, outExpo, inExpo, outBack...).
+6. **Colour**: use each shot's `palette` hex values directly (bg gradient = the 2 darkest dominant colours).
+7. **Build** from the right template (§2). One function per shot, SHOTS and TRANSITIONS arrays, KF table at top.
+8. **Render**: web engines `node tools/render.mjs <projectDir> --out mine.mp4` (fails loudly on any page error); Blender `bash templates/blender/render_blender.sh scene.py mine.mp4 draft`; 67.js through its MCP export.
+9. **Score + fix**: `python3 tools/compare.py ref.mp4 mine.mp4 ana/analysis.json`. Fix the worst shot first (framing → timing → colour → easing), re-render only that range with `--from/--to`, repeat until gains are small (≤ 3 rounds unless asked).
+10. **Deliver**: code folder + MP4 + 3-line note (engine, scores, known gaps).
 
 ## 4. Workflow B — original video from an idea
 Write a beat sheet first (hook 0–2 s, build, reveal/climax ~70 %, CTA, clean loop/end), then KF, then shots. Same render/score steps minus the reference.
@@ -84,8 +98,8 @@ Write `edl.json` (bgm, voiceover with startMs, sfx events on KF beats) → `pyth
 
 ## 9. What code can and can't match
 Near 1:1: 2D motion graphics, math/geometry art, kinetic typography, infographics, UI animations, particles, low-poly/toon 3D, product spins with PBR (Three).
-Stylised only: realistic humans/skin/hair, cloth, fluid simulation, photoreal Blender/Unreal renders, live-action footage. Say so up front and aim for the closest clean stylised version.
-
+Close (about 70–90% of the look, with good assets, a rig and HDRI light, in 67.js or Blender): realistic 3D scenes, vehicles, rooms, product shots, rigged characters.
+Not possible from code alone: an identical copy of the original characters, live-action footage, exact cloth/fluid sims. Say the category and the honest ceiling before starting.
 ## 10. Self-check before delivering
 - [ ] no forbidden time/random sources (`grep -nE "Math.random|Date.now|millis\(|frameCount|performance.now" ` — performance.now only in preview `draw`)
 - [ ] render.mjs finished with "no page errors"

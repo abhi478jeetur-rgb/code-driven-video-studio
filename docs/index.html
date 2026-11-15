@@ -1,0 +1,42 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Code-Driven Video Studio — reference video to code to MP4</title>
+<meta name="description" content="A skill for coding agents: recreate any reference video in code with p5.js, Three.js, 67.js or Blender bpy, render it frame by frame and score it.">
+<meta property="og:title" content="Code-Driven Video Studio v3"><meta property="og:description" content="Reference video → code → MP4. p5.js · Three.js · 67.js · Blender bpy.">
+<meta property="og:image" content="https://abhi478jeetur-rgb.github.io/code-driven-video-studio/og.png"><meta property="og:url" content="https://abhi478jeetur-rgb.github.io/code-driven-video-studio/"><meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://abhi478jeetur-rgb.github.io/code-driven-video-studio/og.png">
+<style>
+:root{--bg:#07051a;--card:#120a26;--gold:#ffc46e;--red:#e43a5c;--vio:#762ac8;--teal:#1c76a8;--tx:#ece9f6;--mu:#a59fc4}
+*{box-sizing:border-box}body{margin:0;font:17px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:radial-gradient(circle at 75% 10%,#26144e,var(--bg) 55%);color:var(--tx)}
+.w{max-width:1040px;margin:0 auto;padding:0 22px}header{padding:90px 0 50px}h1{font-size:clamp(40px,7vw,72px);line-height:1.05;margin:0 0 18px}h1 span{color:var(--gold)}
+.lead{font-size:20px;color:var(--mu);max-width:640px}.btn{display:inline-block;margin:26px 12px 0 0;padding:13px 22px;border-radius:12px;background:var(--red);color:#fff;text-decoration:none;font-weight:700}.btn.alt{background:transparent;border:1px solid #3a2f63}
+h2{font-size:30px;margin:64px 0 18px}.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}.c{background:var(--card);border:1px solid #241a45;border-radius:16px;padding:20px}.c b{color:var(--gold)}
+ol li{margin:8px 0}code,pre{font-family:ui-monospace,Menlo,monospace;font-size:14px}pre{background:#0d0820;border:1px solid #241a45;border-radius:12px;padding:16px;overflow:auto}
+table{width:100%;border-collapse:collapse}td,th{padding:10px;border-bottom:1px solid #241a45;text-align:left}th{color:var(--mu);font-weight:600}
+.v{aspect-ratio:9/16;background:#0d0820;border:1px dashed #3a2f63;border-radius:14px;display:flex;align-items:center;justify-content:center;color:var(--mu)}
+footer{padding:60px 0;color:var(--mu);font-size:14px}
+</style></head><body>
+<header class="w"><h1>Code-Driven<br><span>Video Studio</span></h1>
+<p class="lead">A skill for coding agents. Give it a reference video or an idea. It measures the shots, writes deterministic code, renders an MP4 frame by frame and scores it against the reference.</p>
+<a class="btn" href="https://github.com/abhi478jeetur-rgb/code-driven-video-studio">Get the skill on GitHub</a><a class="btn alt" href="https://github.com/abhi478jeetur-rgb/code-driven-video-studio/blob/master/SKILL.md">Read SKILL.md</a></header>
+<main class="w">
+<h2>Pick the right engine</h2>
+<div class="g"><div class="c"><b>p5-2d</b><br>Math art, kinetic type, particles, infographics, UI motion.</div>
+<div class="c"><b>p5-webgl</b><br>Stylised 3D: low-poly, toon, orbiting cameras. Runs in the p5 editor.</div>
+<div class="c"><b>three-hybrid</b><br>PBR metal and glass, bloom, fog, glTF, 10k+ instances, p5 HUD layer.</div>
+<div class="c"><b>67.js · Blender bpy</b><br>Realistic 3D: rigs, HDRI light, soft shadows, path tracing. Code only.</div></div>
+<h2>How it recreates a video</h2>
+<ol><li><b>Analyse</b>: cuts, per-shot camera, palette, motion curve and object tracks become keyframes.</li>
+<li><b>Recover 3D</b>: camera path (COLMAP), human pose (MediaPipe → BVH), depth for layout.</li>
+<li><b>Build</b>: one function per shot, every value from a KF timeline, real CC/own assets.</li>
+<li><b>Render</b>: headless frame stepping to closed-GOP MP4, chunk re-render per shot.</li>
+<li><b>Score and fix</b>: compare.py rates each shot, the worst one gets fixed first.</li></ol>
+<h2>Examples</h2><div class="g"><div class="v">Math art Short<br>coming soon</div><div class="v">Stylised 3D<br>coming soon</div><div class="v">PBR spin<br>coming soon</div><div class="v">Realistic 3D<br>coming soon</div></div>
+<h2>Quick start</h2>
+<pre>pip install numpy pillow opencv-python-headless
+npm i playwright &amp;&amp; npx playwright install --with-deps chromium
+python3 tools/analyze.py ref.mp4 --out ana
+node tools/render.mjs templates/p5-2d --out test.mp4
+bash templates/blender/render_blender.sh templates/blender/scene.py test3d.mp4 draft</pre>
+<h2>Honest ceiling</h2>
+<table><tr><th>Category</th><th>How close</th></tr><tr><td>2D motion graphics, math art, type, UI</td><td>Near 1:1</td></tr><tr><td>Low-poly / toon 3D, PBR product spins</td><td>Near 1:1</td></tr><tr><td>Realistic 3D scenes with assets + rig + HDRI</td><td>About 70–90%</td></tr><tr><td>Identical character copies, live action</td><td>Not from code</td></tr></table>
+</main><footer class="w">MIT license · v3</footer></body></html>
